@@ -1,0 +1,61 @@
+#!/bin/bash
+
+timestamp=$(date +%Y-%m-%dT%H:%M:%S)
+files=($(cd ~/cfg ; git ls-tree master --name-only)) # get tracked config files
+files=(${files[@]//README*/}) # exclude README
+files=(${files[@]//unlink/})  # exclude unlink script
+files=(${files[@]//link/})    # exclude link script
+
+# parse "--unlink" option from command line (using standard idiom)
+unlink=false
+while test $# -gt 0
+do
+  case "$1" in
+    --unlink) unlink=true
+      ;;
+    --*) echo "Error: invalid option $1"; exit 0
+      ;;
+  esac
+  shift
+done
+
+for file in ${files[@]}; do
+  backup=$file.cfg-backup
+
+  # if unlink option was specified, remove symlinks if they exist
+  # and restore original configuration files from backups
+  if [ "$unlink" = true ] ; then
+    echo "Unlinking $file"
+
+    # only unlink if the symlink exists
+    if [ -L ~/$file ] ; then
+      unlink ~/$file
+    fi
+
+    # only restore if a backup file exists (-f checks for file, -d for checks directory)
+    if [ -f ~/$backup ] || [ -d ~/$backup ] ; then
+      echo "~/$backup exists; restoring as ~/$file"
+      mv ~/$backup ~/$file
+    fi
+
+  # if unlink option was not specified, create a symlink for each configuration file
+  # and create backup versions of configuration files that already exist
+  else
+    echo "Linking $file"
+
+    # only create a backup if the file exists (-f checks for file, -d for checks directory)
+    if [ -f ~/$file ] || [ -d ~/$file ] ; then
+      echo "~/$file exists; backing up as ~/$backup and ~/$backup.$timestamp"
+      mv ~/$file ~/$backup
+      cp -r ~/$backup ~/$backup.$timestamp
+    fi
+
+    # if the file exists, create a symlink
+    if [ -f ~/cfg/$file ] ; then
+      ln -sf ~/cfg/$file ~/$file
+    # if the file exists as a directory, need to use a slightly different symlink command
+    elif [ -d ~/cfg/$file ] ; then
+      ln -sf ~/cfg/$file ~
+    fi
+  fi
+done
