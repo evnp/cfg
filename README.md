@@ -13,3 +13,7 @@ Remove symlinks and restore original config files from backups:
 ```
 $ cfg/unlink
 ```
+Install Vim plugins (from inside vim):
+```
+:PlugInstall!
+```
