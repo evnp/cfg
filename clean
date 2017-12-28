@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# parse "-f" / "--force" option from command line (using standard idiom)
+force=false
+while test $# -gt 0
+do
+  case "$1" in
+    -f) force=true
+      ;;
+    --force) force=true
+      ;;
+    --*) echo "Error: invalid option $1"; exit 0
+      ;;
+  esac
+  shift
+done
+
+pattern=~/.*.cfg-backup.*
+
+if [ $force = true ] ; then
+  echo Removing backup files:
+  rm -rfv $pattern
+  echo Cleaned!
+else
+  echo "Files to be removed (run again with -f to actually remove them):"
+  ls -d $pattern
+fi
