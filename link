@@ -16,43 +16,62 @@ do
   shift
 done
 
-for file in ${files[@]}; do
-  backup=$file.cfg-backup
+mkdir -p backup
+
+filesDir=~/cfg/files
+backupDir=~/cfg/backup
+timestampDir=~/cfg/backup/$timestamp
+
+for fileName in ${files[@]}; do
+  homeFile=~/$fileName
+  cfgFile=$filesDir/$fileName
+  backupFile=$backupDir/$fileName
+  timestampFile=$timestampDir/$fileName
 
   # if unlink option was specified, remove symlinks if they exist
   # and restore original configuration files from backups
   if [ "$unlink" = true ] ; then
-    echo "Unlinking $file"
+    echo "Unlinking $fileName"
 
     # only unlink if the symlink exists
-    if [ -L ~/$file ] ; then
-      unlink ~/$file
+    if [ -L $homeFile ] ; then
+      unlink $homeFile
     fi
 
     # only restore if a backup file exists (-f checks for file, -d for checks directory)
-    if [ -f ~/$backup ] || [ -d ~/$backup ] ; then
-      echo "~/$backup exists; restoring as ~/$file"
-      mv ~/$backup ~/$file
+    if [ -f $backupFile ] || [ -d $backupFile ] ; then
+      echo "$backupFile exists; restoring as $homeFile"
+      mv $backupFile $homeFile
     fi
 
   # if unlink option was not specified, create a symlink for each configuration file
   # and create backup versions of configuration files that already exist
   else
-    echo "Linking $file"
+    echo "Linking $fileName"
 
     # only create a backup if the file exists (-f checks for file, -d for checks directory)
-    if [ -f ~/$file ] || [ -d ~/$file ] ; then
-      echo "~/$file exists; backing up as ~/$backup and ~/$backup.$timestamp"
-      mv ~/$file ~/$backup
-      cp -r ~/$backup ~/$backup.$timestamp
+    if [ -f $homeFile ] || [ -d $homeFile ] ; then
+      echo "$homeFile exists; backing up as $backupFile and $timestampFile"
+      mkdir -p $backupDir
+      mkdir -p $timestampDir
+      cp -r $homeFile $backupFile
+      cp -r $homeFile $timestampFile
+
+      # ensure the backup was created; exit if not
+      if [ -f $backupFile ] || [ -d $backupFile ] ; then
+        rm $homeFile
+      else
+        echo "Error: could not create backup of $homeFile"
+        exit 0
+      fi
     fi
 
     # if the file exists, create a symlink
-    if [ -f ~/cfg/files/$file ] ; then
-      ln -sf ~/cfg/files/$file ~/$file
+    if [ -f $cfgFile ] ; then
+      ln -sf $cfgFile $homeFile
     # if the file exists as a directory, need to use a slightly different symlink command
-    elif [ -d ~/cfg/files/$file ] ; then
-      ln -sf ~/cfg/files/$file ~
+    elif [ -d $cfgFile ] ; then
+      ln -sf $cfgFile ~
     fi
   fi
 done
