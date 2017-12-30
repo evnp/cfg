@@ -1,5 +1,5 @@
 # cfg
-#### shareable shell and editor config files
+#### shareable shell and editor config file management
 ---
 Install (needs to exist in home directory):
 ```
@@ -12,11 +12,6 @@ $ cfg/link
 Remove symlinks and restore original config files from backups:
 ```
 $ cfg/unlink
-```
-Clean up backup files:
-```
-$ cfg/clean     # preview files that will be removed
-$ cfg/clean -f  # actually remove files
 ```
 Install Vim plugins (from inside vim):
 ```

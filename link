@@ -1,10 +1,14 @@
 #!/bin/bash
 
 timestamp=$(date +%Y-%m-%dT%H:%M:%S)
-files=($(cd ~/cfg/files ; git ls-tree master --name-only)) # get tracked config files
+filesDir=~/cfg/cfg-files
+backupDir=~/cfg/cfg-backup
+timestampDir=~/cfg/cfg-backup/$timestamp
+files=($(cd $filesDir ; git ls-tree master --name-only)) # get tracked config files
+files=(${files[@]//README*/})  # exclude README
+unlink=false
 
 # parse "--unlink" option from command line (using standard idiom)
-unlink=false
 while test $# -gt 0
 do
   case "$1" in
@@ -15,12 +19,6 @@ do
   esac
   shift
 done
-
-mkdir -p backup
-
-filesDir=~/cfg/files
-backupDir=~/cfg/backup
-timestampDir=~/cfg/backup/$timestamp
 
 for fileName in ${files[@]}; do
   homeFile=~/$fileName
