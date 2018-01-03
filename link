@@ -57,7 +57,7 @@ for fileName in ${files[@]}; do
 
       # ensure the backup was created; exit if not
       if [ -f $backupFile ] || [ -d $backupFile ] ; then
-        rm $homeFile
+        rm -rf $homeFile
       else
         echo "Error: could not create backup of $homeFile"
         exit 0
