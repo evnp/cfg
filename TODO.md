@@ -1,0 +1,2 @@
+- [ ] make it so random extra files (like TODO.md) aren't linked and pollute home dir
+- [ ] make it so existing links aren't re-linked wastefully on every link operation
